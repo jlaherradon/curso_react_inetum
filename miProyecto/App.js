@@ -1,21 +1,19 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
-export default function App() {
+import { Text, View, TouchableHighlight } from 'react-native';
+const Button = () => (
+<TouchableHighlight>
+<Text>Hello World</Text>
+</TouchableHighlight>
+)
+const YourApp = () => {
   return (
-    <View style={styles.container}>
-      <Text>Esto es una prueba de React</Text>
-      <StatusBar style="auto" />
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text>
+        Try editing me! 🎉
+      </Text>
+      <Button/>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default YourApp;
