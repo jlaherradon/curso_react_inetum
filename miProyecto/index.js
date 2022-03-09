@@ -1,6 +1,6 @@
 import { registerRootComponent } from 'expo';
 
-import App from './todoApp/app/App';
+import App from './Listing-5.10-Flexwrap/App'
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
