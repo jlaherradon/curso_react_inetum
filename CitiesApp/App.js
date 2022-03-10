@@ -1,112 +1,78 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, { Component } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  Platform,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
+  AsyncStorage
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import Tabs from './src'
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+const key = 'state'
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+const initialState = [{
+  city: 'Paris',
+  country: 'France',
+  id: 0,
+  locations: []
+},
+{
+  city: 'Tokyo',
+  country: 'Japan',
+  id: 1,
+  locations: []
+}]
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
+export default class App extends Component {
+  state = {
+    cities: []
+  }
+  async componentDidMount() {
+    try {
+      let cities = await AsyncStorage.getItem(key)
+      cities = JSON.parse(cities)
+      this.setState({ cities })
+    } catch (e) {
+      console.log('error from AsyncStorage: ', e)
+    }
+  }
+  addCity = (city) => {
+    const cities = this.state.cities
+    cities.push(city)
+    this.setState({ cities })
+    AsyncStorage.setItem(key, JSON.stringify(cities))
+      .then(() => console.log('storage updated!'))
+      .catch(e => console.log('e: ', e))
+  }
+  addLocation = (location, city) => {
+    const index = this.state.cities.findIndex(item => {
+      return item.id === city.id
+    })
+    const chosenCity = this.state.cities[index]
+    chosenCity.locations.push(location)
+    const cities = [
+      ...this.state.cities.slice(0, index),
+      chosenCity,
+      ...this.state.cities.slice(index + 1)
+    ]
+    this.setState({
+      cities
+    }, () => {
+      AsyncStorage.setItem(key, JSON.stringify(cities))
+        .then(() => console.log('storage updated!'))
+        .catch(e => console.log('e: ', e))
+      })
+  }
+  render() {
+    return (
+      <Tabs
+        screenProps={{
+          cities: this.state.cities,
+          addCity: this.addCity,
+          addLocation: this.addLocation
+        }}
+      />
+    )
+  }
+}
